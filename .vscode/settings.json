@@ -1,0 +1,40 @@
+{
+  // Python: VS Code auto-detects ./.venv. If not, run "Python: Select Interpreter".
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.extraPaths": ["src"],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["tests"],
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll": "explicit"
+    }
+  },
+  "ruff.lint.enable": true,
+  "mypy-type-checker.args": ["--config-file=pyproject.toml"],
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/.mypy_cache": true,
+    "**/*.egg-info": true
+  },
+  "search.exclude": {
+    "data/raw": true,
+    "artefacts": true,
+    ".venv": true
+  },
+  "files.watcherExclude": {
+    "**/data/raw/**": true,
+    "**/artefacts/**": true
+  },
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
+  }
+}

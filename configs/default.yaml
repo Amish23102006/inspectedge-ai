@@ -1,0 +1,42 @@
+# InspectEdge AI default experiment config.
+# Every run stores a hash of this file alongside its metrics (see reports/runs/).
+project:
+  seed: 42
+
+data:
+  root: data/raw/mvtec_ad        # expects <root>/<category>/{train,test,ground_truth}
+  category: bottle               # document WHY you chose this category in README
+  image_size: 256
+  val_fraction: 0.2              # held-out DEFECT-FREE train images, used only for threshold calibration
+
+model:
+  method: knn_patch              # knn_patch (Baseline A) | autoencoder (Baseline B)
+  backbone: resnet18
+  layers: [layer2, layer3]
+  k: 1
+  memory_bank_max: 20000
+  ae_epochs: 50
+  ae_batch_size: 16
+  ae_lr: 0.001
+  device: cpu
+
+policy:
+  # Thresholds are calibrated on held-out NORMAL validation scores. Never on the test set.
+  pass_quantile: 0.95
+  likely_anomaly_quantile: 0.995
+
+quality:
+  min_blur_variance: 20.0
+  min_brightness: 25.0
+  max_brightness: 230.0
+  min_contrast: 8.0
+
+upload:
+  max_bytes: 10485760            # 10 MB
+  max_pixels: 40000000
+  allowed_content_types: [image/png, image/jpeg]
+
+paths:
+  artefacts: artefacts
+  reports: reports/runs
+  db: artefacts/inspectedge.db

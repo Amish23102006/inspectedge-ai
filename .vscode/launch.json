@@ -1,0 +1,74 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "1. Prepare data (index + leakage check)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "inspectedge.data.prepare",
+      "args": ["--config", "configs/default.yaml"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "2. Train + evaluate baseline (config method)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "inspectedge.evaluation.run_eval",
+      "args": ["--config", "configs/default.yaml"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "2b. Train + evaluate autoencoder baseline",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "inspectedge.evaluation.run_eval",
+      "args": ["--config", "configs/default.yaml", "--method", "autoencoder"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "3. API (FastAPI, reload)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["api.main:create_app", "--factory", "--reload", "--port", "8000"],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "4. Dashboard (Streamlit)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "streamlit",
+      "args": ["run", "dashboard/app.py", "--server.port", "8501"],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Pytest: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["${file}", "-v"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ],
+  "compounds": [
+    {
+      "name": "API + Dashboard",
+      "configurations": ["3. API (FastAPI, reload)", "4. Dashboard (Streamlit)"],
+      "stopAll": true
+    }
+  ]
+}

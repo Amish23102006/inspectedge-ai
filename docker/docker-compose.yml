@@ -1,0 +1,17 @@
+# Run from repo root: docker compose -f docker/docker-compose.yml up --build
+services:
+  api:
+    build: { context: .., dockerfile: docker/Dockerfile }
+    ports: ["8000:8000"]
+    environment:
+      INSPECTEDGE_CONFIG: configs/default.yaml
+      INSPECTEDGE_ARTEFACT_DIR: ${INSPECTEDGE_ARTEFACT_DIR:-}
+    volumes:
+      - ../artefacts:/app/artefacts
+  dashboard:
+    build: { context: .., dockerfile: docker/Dockerfile }
+    command: ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    ports: ["8501:8501"]
+    environment:
+      INSPECTEDGE_API_URL: http://api:8000
+    depends_on: [api]

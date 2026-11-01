@@ -1,0 +1,69 @@
+{
+  // Ctrl+Shift+P -> "Tasks: Run Task". Works on Windows (PowerShell) and macOS/Linux.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup: create .venv",
+      "type": "shell",
+      "command": "python3 -m venv .venv",
+      "windows": { "command": "py -3.11 -m venv .venv" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup: install core + api + dashboard + dev",
+      "type": "shell",
+      "command": ".venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -e \".[api,dashboard,dev]\"",
+      "windows": { "command": ".venv\\Scripts\\python -m pip install --upgrade pip; .venv\\Scripts\\python -m pip install -e \".[api,dashboard,dev]\"" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup: install PyTorch (CPU)",
+      "type": "shell",
+      "command": ".venv/bin/python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu",
+      "windows": { "command": ".venv\\Scripts\\python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: pytest",
+      "type": "shell",
+      "command": ".venv/bin/python -m pytest",
+      "windows": { "command": ".venv\\Scripts\\python -m pytest" },
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint: ruff",
+      "type": "shell",
+      "command": ".venv/bin/python -m ruff check . && .venv/bin/python -m ruff format --check .",
+      "windows": { "command": ".venv\\Scripts\\python -m ruff check .; .venv\\Scripts\\python -m ruff format --check ." },
+      "problemMatcher": []
+    },
+    {
+      "label": "Format: ruff",
+      "type": "shell",
+      "command": ".venv/bin/python -m ruff format . && .venv/bin/python -m ruff check --fix .",
+      "windows": { "command": ".venv\\Scripts\\python -m ruff format .; .venv\\Scripts\\python -m ruff check --fix ." },
+      "problemMatcher": []
+    },
+    {
+      "label": "Data: prepare (index + leakage check)",
+      "type": "shell",
+      "command": ".venv/bin/python -m inspectedge.data.prepare --config configs/default.yaml",
+      "windows": { "command": ".venv\\Scripts\\python -m inspectedge.data.prepare --config configs/default.yaml" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Eval: train + evaluate baseline",
+      "type": "shell",
+      "command": ".venv/bin/python -m inspectedge.evaluation.run_eval --config configs/default.yaml",
+      "windows": { "command": ".venv\\Scripts\\python -m inspectedge.evaluation.run_eval --config configs/default.yaml" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: compose up",
+      "type": "shell",
+      "command": "docker compose -f docker/docker-compose.yml up --build",
+      "problemMatcher": []
+    }
+  ]
+}
