@@ -1,0 +1,16 @@
+# For kube-prometheus-stack only (needs the Prometheus Operator CRDs). See monitoring/README.md.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: inspectedge-api
+  namespace: inspectedge
+  labels:
+    release: monitoring   # must match the Helm release name of kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inspectedge-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

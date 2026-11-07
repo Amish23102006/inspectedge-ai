@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inspectedge-api
+  namespace: inspectedge
+  labels:
+    app.kubernetes.io/name: inspectedge-api
+    app.kubernetes.io/part-of: inspectedge-ai
+spec:
+  # No `replicas:` on purpose: the HPA owns the replica count (min 2, max 5), and a fixed
+  # value here would reset it on every `kubectl apply`.
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inspectedge-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: inspectedge-api
+        app.kubernetes.io/part-of: inspectedge-ai
+      annotations:
+        # Picked up by a plain Prometheus using the common kubernetes-pods scrape config.
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: /metrics
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          # Built locally by scripts/k8s/build-images.sh (base image + trained model artefact).
+          image: inspectedge-ai-model:0.2.0
+          # Local clusters only: use the image already loaded into the node, never pull.
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: inspectedge-env
+          # Starting point from the plan; tune from `kubectl top pods` during the load test.
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          # Allows up to 180 s for import + model load before liveness takes over.
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 36
+          # Not ready (no model, DB unavailable, or draining) -> removed from Service endpoints.
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+            successThreshold: 1
+          # Event loop stuck -> container restarted. Does not check the model or DB.
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              # Give endpoint removal time to propagate before uvicorn stops accepting.
+              exec:
+                command: ["sleep", "5"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: app-config
+              mountPath: /etc/inspectedge
+              readOnly: true
+            # Per-pod audit DB + heatmaps (lost when the pod goes; see docs/kubernetes.md).
+            - name: artefacts
+              mountPath: /app/artefacts
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: app-config
+          configMap:
+            name: inspectedge-app-config
+        - name: artefacts
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

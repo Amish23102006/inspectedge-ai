@@ -40,6 +40,21 @@ The score is the maximum of the smoothed heatmap, so the score and the highlight
    - Copy `.env.example` to `.env` and set `INSPECTEDGE_ARTEFACT_DIR` to the printed artefact path.
    - `API + Dashboard` (compound) — API on <http://localhost:8000/docs>, dashboard on <http://localhost:8501>.
 
+## Run on Kubernetes (minikube)
+
+With a trained artefact from step 5, deploy the API to a local cluster with probes, resource limits, autoscaling (2–5 pods), Prometheus metrics, an in-cluster k6 load test and failure drills:
+
+```bash
+brew install minikube kubectl            # plus Docker Desktop
+scripts/k8s/cluster-up.sh && scripts/k8s/build-images.sh && scripts/k8s/deploy.sh
+scripts/k8s/smoke-test.sh
+scripts/k8s/load-test.sh                 # results -> reports/k8s/<timestamp>-load/
+scripts/k8s/recovery-test.sh             # results -> reports/k8s/<timestamp>-recovery/
+scripts/k8s/cleanup.sh
+```
+
+Full guide, design notes and limitations: [`docs/kubernetes.md`](docs/kubernetes.md). Measured results: [`docs/results.md`](docs/results.md).
+
 Prefer a container? **Dev Containers: Reopen in Container** uses `.devcontainer/` and installs everything. macOS/Linux users can also use `make install`, `make test`, `make eval`, etc.
 
 ## Repository layout
@@ -57,10 +72,17 @@ src/inspectedge/
   evaluation/               metrics + run_eval CLI
   inference/                upload validation, inspection service, heatmap rendering
   audit/                    SQLite audit store
-api/                        FastAPI (/inspect, /reviews, /inspections/{id}, /heatmaps/{id}, /health)
+  observability.py          Prometheus metrics + readiness state
+api/                        FastAPI (/inspect, /reviews, /inspections/{id}, /heatmaps/{id},
+                            /health, /health/live, /health/ready, /metrics)
 dashboard/                  Streamlit reviewer UI
 tests/                      pytest suite (runs without torch or data)
-docker/, .github/workflows/ container build and CI
+docker/, .github/workflows/ container build (pinned, non-root) and CI (tests + kind smoke test)
+requirements/               hashed lock file for the Docker image
+k8s/                        namespace, ConfigMaps, Deployment, Service, HPA (kubectl apply -k k8s/)
+scripts/k8s/                cluster up, build, deploy, smoke, load, recovery, cleanup
+tests/load/                 k6 load test (runs as an in-cluster Job)
+monitoring/                 metrics reference, PromQL, optional Prometheus/Grafana setup
 reports/                    model card; run reports are generated (git-ignored)
 ```
 
@@ -93,6 +115,7 @@ reports/                    model card; run reports are generated (git-ignored)
 | 4 Edge | ONNX export, parity, INT8 quantisation, CPU benchmark | ⬜ not started |
 | 5 Sensors | NASA CMAPSS RUL baselines | ⬜ not started |
 | 6 Portfolio quality | Docker, CI, model card, security checks | 🟡 partial |
+| 6b Kubernetes | Probes, HPA, metrics, load + recovery tests on minikube | ✅ measured (docs/results.md) |
 | 7 Research | VisA external validation, ablations | ⬜ not started |
 
 ## Security, privacy and limitations
@@ -100,7 +123,7 @@ reports/                    model card; run reports are generated (git-ignored)
 - Uploads: allow-listed MIME types, magic-byte check, byte and pixel (decompression) limits; heatmaps stored under random UUID names; UUID-typed routes block path traversal.
 - Decisions come only from deterministic model scores and configured thresholds. No generative model decides anything.
 - **No authentication yet**: `reviewer_id` is self-declared. Do not expose the API publicly. Role-based access is on the roadmap.
-- No rate limiting or malware scanning yet; SQLite is single-node only.
+- No rate limiting or malware scanning yet; SQLite is single-node only (on Kubernetes each pod has its own audit DB; see `docs/kubernetes.md`).
 - Models are trained per category; results on one MVTec category say nothing about another factory or product.
 - A heatmap is a model explanation, not a verified physical root cause.
 

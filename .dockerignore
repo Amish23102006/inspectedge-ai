@@ -1,0 +1,19 @@
+# Keep the build context small and free of data, models and secrets.
+.git
+.venv
+venv
+.env
+data/
+artefacts/
+reports/runs/
+mlruns/
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.ruff_cache
+.mypy_cache
+notebooks/
+docs/
+k8s/
+monitoring/
+tests/

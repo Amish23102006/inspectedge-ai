@@ -1,0 +1,20 @@
+flowchart LR
+    subgraph mac["Developer Mac"]
+      ev["make eval<br/>trains kNN model<br/>on MVTec AD bottle"] --> art[("artefacts/&lt;model_id&gt;")]
+      art --> img["docker build<br/>base image + model<br/>inspectedge-ai-model:0.2.0"]
+    end
+    subgraph mk["minikube cluster"]
+      subgraph ns["namespace: inspectedge (Pod Security: restricted)"]
+        k6["k6 Job<br/>ramp or steady load"] -->|POST /inspect| svc["Service<br/>inspectedge-api :80"]
+        svc -->|ready pods only| p1["Pod 1<br/>FastAPI + uvicorn"]
+        svc --> p2["Pod 2"]
+        svc -.-> pn["Pods 3-5<br/>added by HPA"]
+        cm["ConfigMaps<br/>env + config.yaml"] --> p1
+        hpa["HPA autoscaling/v2<br/>min 2, max 5<br/>CPU target 65%"] -->|scales| dep["Deployment<br/>req 250m/512Mi<br/>lim 1 CPU/1Gi"]
+        dep --> p1 & p2 & pn
+      end
+      ms["Metrics Server"] -->|pod CPU| hpa
+      kl["kubelet probes<br/>startup + liveness: /health/live<br/>readiness: /health/ready"] --> p1
+      prom["Prometheus (optional)<br/>scrapes /metrics"] -.-> p1
+    end
+    img -->|minikube image load| dep

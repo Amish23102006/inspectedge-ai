@@ -27,3 +27,6 @@ Thumbs.db
 venv/
 node_modules/
 __pycache__/
+# Kubernetes load-test sample image may be derived from MVTec AD -> do not commit
+reports/k8s/sample.png
+build/

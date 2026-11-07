@@ -1,0 +1,82 @@
+# Application settings. No secrets here: this app needs none. If one is ever added,
+# create it with `kubectl create secret` and never commit its value.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inspectedge-env
+  namespace: inspectedge
+  labels:
+    app.kubernetes.io/name: inspectedge-api
+    app.kubernetes.io/part-of: inspectedge-ai
+data:
+  INSPECTEDGE_CONFIG: /etc/inspectedge/config.yaml
+  # Readiness fails until a model artefact is loaded (no pod serves 503s).
+  INSPECTEDGE_REQUIRE_MODEL: "true"
+  INSPECTEDGE_MAX_CONCURRENT_INFERENCES: "2"
+  INSPECTEDGE_DRAIN_FILE: /tmp/inspectedge.drain
+  # Recovery-test hook; keep 0 in normal runs.
+  INSPECTEDGE_STARTUP_DELAY_SECONDS: "0"
+  # Match math-library threads to the 1-CPU limit to avoid CPU throttling.
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  # Root filesystem is read-only; send any library caches to the /tmp emptyDir.
+  HOME: /tmp
+  XDG_CACHE_HOME: /tmp/.cache
+---
+# Mounted as a file at /etc/inspectedge/config.yaml (kept separate from the env ConfigMap so
+# it is not also turned into an environment variable).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inspectedge-app-config
+  namespace: inspectedge
+  labels:
+    app.kubernetes.io/name: inspectedge-api
+    app.kubernetes.io/part-of: inspectedge-ai
+data:
+  # Must match the config the served model was trained with (tests/test_k8s_manifests.py
+  # checks it equals configs/default.yaml).
+  config.yaml: |
+    # InspectEdge AI default experiment config.
+    # Every run stores a hash of this file alongside its metrics (see reports/runs/).
+    project:
+      seed: 42
+
+    data:
+      root: data/raw/mvtec_ad        # expects <root>/<category>/{train,test,ground_truth}
+      category: bottle               # document WHY you chose this category in README
+      image_size: 256
+      val_fraction: 0.2              # held-out DEFECT-FREE train images, used only for threshold calibration
+
+    model:
+      method: knn_patch              # knn_patch (Baseline A) | autoencoder (Baseline B)
+      backbone: resnet18
+      layers: [layer2, layer3]
+      k: 1
+      memory_bank_max: 20000
+      ae_epochs: 50
+      ae_batch_size: 16
+      ae_lr: 0.001
+      device: cpu
+
+    policy:
+      # Thresholds are calibrated on held-out NORMAL validation scores. Never on the test set.
+      pass_quantile: 0.95
+      likely_anomaly_quantile: 0.995
+
+    quality:
+      min_blur_variance: 20.0
+      min_brightness: 25.0
+      max_brightness: 230.0
+      min_contrast: 8.0
+
+    upload:
+      max_bytes: 10485760            # 10 MB
+      max_pixels: 40000000
+      allowed_content_types: [image/png, image/jpeg]
+
+    paths:
+      artefacts: artefacts
+      reports: reports/runs
+      db: artefacts/inspectedge.db

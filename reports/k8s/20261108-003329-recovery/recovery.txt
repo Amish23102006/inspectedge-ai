@@ -1,0 +1,16 @@
+A. deleting pod inspectedge-api-795c76cbcf-rjc5j (ready 2/2)
+A. replacement pod created automatically and Ready after 7s
+A. deployment ready 2/2
+B. failing readiness on inspectedge-api-795c76cbcf-p27dr (10.244.0.16) by creating /tmp/inspectedge.drain
+B. marked not-ready in Service endpoints after 10s
+B. restarts while unready: 0 (expected 0: liveness unaffected)
+B. back in Service endpoints after 4s
+C. rolling out with INSPECTEDGE_STARTUP_DELAY_SECONDS=60 (startup budget 180 s)
+C. rollout with slow startup completed after 266s; ready 5/5
+restoring normal startup
+=== InspectEdge load test (steady) ===
+requests:    960
+throughput:  2 req/s
+error rate:  0.00 %
+latency ms:  p50 900.7 | p95 5295.7 | p99 5688.8 | max 5983.4
+K6_SUMMARY_JSON {"profile":"steady","requests":960,"throughput_rps":2,"error_rate":0,"latency_ms":{"p50":"900.7","p90":"4873.1","p95":"5295.7","p99":"5688.8","max":"5983.4"}}
