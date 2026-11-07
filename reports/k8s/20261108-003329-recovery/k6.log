@@ -1,0 +1,7 @@
+
+=== InspectEdge load test (steady) ===
+requests:    960
+throughput:  2 req/s
+error rate:  0.00 %
+latency ms:  p50 900.7 | p95 5295.7 | p99 5688.8 | max 5983.4
+K6_SUMMARY_JSON {"profile":"steady","requests":960,"throughput_rps":2,"error_rate":0,"latency_ms":{"p50":"900.7","p90":"4873.1","p95":"5295.7","p99":"5688.8","max":"5983.4"}}

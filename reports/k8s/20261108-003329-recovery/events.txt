@@ -1,0 +1,180 @@
+LAST SEEN   TYPE      REASON              OBJECT                                    MESSAGE
+55m         Normal    Scheduled           pod/k6-ramp-d2xc2                         Successfully assigned inspectedge/k6-ramp-d2xc2 to minikube
+55m         Normal    Pulling             pod/k6-ramp-d2xc2                         Pulling image "grafana/k6:1.0.0"
+55m         Normal    SuccessfulCreate    job/k6-ramp                               Created pod: k6-ramp-d2xc2
+55m         Normal    Pulled              pod/k6-ramp-d2xc2                         Successfully pulled image "grafana/k6:1.0.0" in 22.661s (22.661s including waiting). Image size: 34944542 bytes.
+55m         Normal    Created             pod/k6-ramp-d2xc2                         Container created
+55m         Normal    Started             pod/k6-ramp-d2xc2                         Container started
+54m         Normal    Killing             pod/k6-ramp-d2xc2                         Stopping container k6
+54m         Normal    SuccessfulCreate    job/k6-ramp                               Created pod: k6-ramp-xn4t5
+54m         Normal    Scheduled           pod/k6-ramp-xn4t5                         Successfully assigned inspectedge/k6-ramp-xn4t5 to minikube
+54m         Normal    Started             pod/k6-ramp-xn4t5                         Container started
+54m         Normal    Pulled              pod/k6-ramp-xn4t5                         Container image "grafana/k6:1.0.0" already present on machine and can be accessed by the pod
+54m         Normal    Created             pod/k6-ramp-xn4t5                         Container created
+53m         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-7qcct
+53m         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-76jtt      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-76jtt to minikube
+53m         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-7qcct      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-7qcct to minikube
+53m         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-76jtt
+53m         Normal    Pulled              pod/inspectedge-api-795c76cbcf-76jtt      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+53m         Normal    Created             pod/inspectedge-api-795c76cbcf-76jtt      Container created
+53m         Normal    Pulled              pod/inspectedge-api-795c76cbcf-7qcct      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+53m         Normal    Created             pod/inspectedge-api-795c76cbcf-7qcct      Container created
+53m         Normal    Started             pod/inspectedge-api-795c76cbcf-7qcct      Container started
+53m         Normal    Started             pod/inspectedge-api-795c76cbcf-76jtt      Container started
+53m         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-wpbt9      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-wpbt9 to minikube
+53m         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-wpbt9
+53m         Normal    Started             pod/inspectedge-api-795c76cbcf-wpbt9      Container started
+53m         Normal    Pulled              pod/inspectedge-api-795c76cbcf-wpbt9      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+53m         Normal    Created             pod/inspectedge-api-795c76cbcf-wpbt9      Container created
+53m         Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-wpbt9      Startup probe failed: Get "http://10.244.0.10:8000/health/live": dial tcp 10.244.0.10:8000: connect: connection refused
+47m         Normal    Completed           job/k6-ramp                               Job completed
+44m         Normal    Killing             pod/inspectedge-api-795c76cbcf-wpbt9      Stopping container api
+44m         Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-wpbt9
+43m         Normal    Killing             pod/inspectedge-api-795c76cbcf-7qcct      Stopping container api
+43m         Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-7qcct
+43m         Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-7qcct      Readiness probe failed: Get "http://10.244.0.8:8000/health/ready": dial tcp 10.244.0.8:8000: connect: connection refused
+43m         Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-76jtt
+43m         Normal    Killing             pod/inspectedge-api-795c76cbcf-76jtt      Stopping container api
+43m         Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-76jtt      Readiness probe failed: Get "http://10.244.0.9:8000/health/ready": dial tcp 10.244.0.9:8000: connect: connection refused
+18m         Normal    Created             pod/k6-ramp-bkkgn                         Container created
+18m         Normal    Scheduled           pod/k6-ramp-bkkgn                         Successfully assigned inspectedge/k6-ramp-bkkgn to minikube
+18m         Normal    Pulled              pod/k6-ramp-bkkgn                         Container image "grafana/k6:1.0.0" already present on machine and can be accessed by the pod
+18m         Normal    Started             pod/k6-ramp-bkkgn                         Container started
+18m         Normal    SuccessfulCreate    job/k6-ramp                               Created pod: k6-ramp-bkkgn
+16m         Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled up replica set inspectedge-api-795c76cbcf from 2 to 4
+16m         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-9cmpj      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-9cmpj to minikube
+16m         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-nw9np      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-nw9np to minikube
+16m         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-9cmpj
+16m         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-nw9np
+16m         Normal    Created             pod/inspectedge-api-795c76cbcf-nw9np      Container created
+16m         Normal    Started             pod/inspectedge-api-795c76cbcf-nw9np      Container started
+16m         Normal    Pulled              pod/inspectedge-api-795c76cbcf-nw9np      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+16m         Normal    Started             pod/inspectedge-api-795c76cbcf-9cmpj      Container started
+16m         Normal    Created             pod/inspectedge-api-795c76cbcf-9cmpj      Container created
+16m         Normal    Pulled              pod/inspectedge-api-795c76cbcf-9cmpj      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+16m         Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-nw9np      Startup probe failed: Get "http://10.244.0.12:8000/health/live": dial tcp 10.244.0.12:8000: connect: connection refused
+16m         Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-9cmpj      Startup probe failed: Get "http://10.244.0.13:8000/health/live": dial tcp 10.244.0.13:8000: connect: connection refused
+16m         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-pr7j8      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-pr7j8 to minikube
+16m         Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled up replica set inspectedge-api-795c76cbcf from 4 to 5
+16m         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-pr7j8
+16m         Normal    Started             pod/inspectedge-api-795c76cbcf-pr7j8      Container started
+16m         Normal    Created             pod/inspectedge-api-795c76cbcf-pr7j8      Container created
+16m         Normal    Pulled              pod/inspectedge-api-795c76cbcf-pr7j8      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+11m         Normal    Completed           job/k6-ramp                               Job completed
+8m11s       Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled down replica set inspectedge-api-795c76cbcf from 5 to 4
+8m11s       Normal    SuccessfulRescale   horizontalpodautoscaler/inspectedge-api   New size: 4; reason: All metrics below target
+8m11s       Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-nw9np
+8m11s       Normal    Killing             pod/inspectedge-api-795c76cbcf-nw9np      Stopping container api
+7m41s       Normal    SuccessfulRescale   horizontalpodautoscaler/inspectedge-api   New size: 3; reason: All metrics below target
+7m41s       Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-9cmpj
+7m41s       Normal    Killing             pod/inspectedge-api-795c76cbcf-9cmpj      Stopping container api
+7m11s       Normal    Killing             pod/inspectedge-api-795c76cbcf-pr7j8      Stopping container api
+7m11s       Normal    SuccessfulRescale   horizontalpodautoscaler/inspectedge-api   New size: 2; reason: All metrics below target
+7m11s       Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-pr7j8
+6m41s       Normal    Scheduled           pod/k6-steady-mrkmr                       Successfully assigned inspectedge/k6-steady-mrkmr to minikube
+6m41s       Normal    SuccessfulCreate    job/k6-steady                             Created pod: k6-steady-mrkmr
+6m41s       Normal    Started             pod/k6-steady-mrkmr                       Container started
+6m41s       Normal    Created             pod/k6-steady-mrkmr                       Container created
+6m41s       Normal    Pulled              pod/k6-steady-mrkmr                       Container image "grafana/k6:1.0.0" already present on machine and can be accessed by the pod
+6m21s       Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-p27dr
+6m21s       Normal    Killing             pod/inspectedge-api-795c76cbcf-rjc5j      Stopping container api
+6m21s       Normal    Scheduled           pod/inspectedge-api-795c76cbcf-p27dr      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-p27dr to minikube
+6m20s       Normal    Pulled              pod/inspectedge-api-795c76cbcf-p27dr      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+6m20s       Normal    Started             pod/inspectedge-api-795c76cbcf-p27dr      Container started
+6m20s       Normal    Created             pod/inspectedge-api-795c76cbcf-p27dr      Container created
+5m25s       Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-p27dr      Readiness probe failed: HTTP probe failed with statuscode: 503
+4m59s       Normal    Scheduled           pod/inspectedge-api-6854dbdff6-qgrrd      Successfully assigned inspectedge/inspectedge-api-6854dbdff6-qgrrd to minikube
+4m59s       Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled up replica set inspectedge-api-6854dbdff6 from 0 to 1
+4m59s       Normal    Pulled              pod/inspectedge-api-6854dbdff6-qgrrd      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+4m59s       Normal    SuccessfulCreate    replicaset/inspectedge-api-6854dbdff6     Created pod: inspectedge-api-6854dbdff6-qgrrd
+4m59s       Normal    Started             pod/inspectedge-api-6854dbdff6-qgrrd      Container started
+4m59s       Normal    Created             pod/inspectedge-api-6854dbdff6-qgrrd      Container created
+4m56s       Normal    Pulled              pod/inspectedge-api-795c76cbcf-fzfwj      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+4m56s       Normal    Scheduled           pod/inspectedge-api-795c76cbcf-fzfwj      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-fzfwj to minikube
+4m56s       Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled up replica set inspectedge-api-6854dbdff6 from 1 to 2
+4m56s       Normal    SuccessfulRescale   horizontalpodautoscaler/inspectedge-api   New size: 4; reason: cpu resource utilization (percentage of request) above target
+4m56s       Normal    SuccessfulCreate    replicaset/inspectedge-api-6854dbdff6     Created pod: inspectedge-api-6854dbdff6-frpd2
+4m56s       Normal    Pulled              pod/inspectedge-api-6854dbdff6-frpd2      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+4m56s       Normal    Created             pod/inspectedge-api-795c76cbcf-fzfwj      Container created
+4m56s       Normal    Scheduled           pod/inspectedge-api-6854dbdff6-frpd2      Successfully assigned inspectedge/inspectedge-api-6854dbdff6-frpd2 to minikube
+4m56s       Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-fzfwj
+4m55s       Normal    Created             pod/inspectedge-api-6854dbdff6-frpd2      Container created
+4m55s       Normal    Started             pod/inspectedge-api-795c76cbcf-fzfwj      Container started
+4m55s       Normal    Started             pod/inspectedge-api-6854dbdff6-frpd2      Container started
+4m26s       Normal    Created             pod/inspectedge-api-795c76cbcf-9956b      Container created
+4m26s       Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-9956b
+4m26s       Normal    SuccessfulRescale   horizontalpodautoscaler/inspectedge-api   New size: 5; reason: cpu resource utilization (percentage of request) above target
+4m26s       Normal    Pulled              pod/inspectedge-api-795c76cbcf-9956b      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+4m26s       Normal    Scheduled           pod/inspectedge-api-795c76cbcf-9956b      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-9956b to minikube
+4m25s       Normal    Started             pod/inspectedge-api-795c76cbcf-9956b      Container started
+3m59s       Warning   Unhealthy           pod/inspectedge-api-6854dbdff6-qgrrd      Startup probe failed: Get "http://10.244.0.17:8000/health/live": dial tcp 10.244.0.17:8000: connect: connection refused
+3m56s       Warning   Unhealthy           pod/inspectedge-api-6854dbdff6-frpd2      Startup probe failed: Get "http://10.244.0.19:8000/health/live": dial tcp 10.244.0.19:8000: connect: connection refused
+3m51s       Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-9956b
+3m51s       Normal    Killing             pod/inspectedge-api-795c76cbcf-9956b      Stopping container api
+3m51s       Normal    Scheduled           pod/inspectedge-api-6854dbdff6-jbkgl      Successfully assigned inspectedge/inspectedge-api-6854dbdff6-jbkgl to minikube
+3m51s       Normal    SuccessfulCreate    replicaset/inspectedge-api-6854dbdff6     Created pod: inspectedge-api-6854dbdff6-jbkgl
+3m51s       Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled down replica set inspectedge-api-795c76cbcf from 4 to 3
+3m50s       Normal    Pulled              pod/inspectedge-api-6854dbdff6-jbkgl      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+3m50s       Normal    Created             pod/inspectedge-api-6854dbdff6-jbkgl      Container created
+3m50s       Normal    Started             pod/inspectedge-api-6854dbdff6-jbkgl      Container started
+2m50s       Warning   Unhealthy           pod/inspectedge-api-6854dbdff6-jbkgl      Startup probe failed: Get "http://10.244.0.21:8000/health/live": dial tcp 10.244.0.21:8000: connect: connection refused
+2m45s       Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled down replica set inspectedge-api-795c76cbcf from 3 to 2
+2m45s       Normal    Killing             pod/inspectedge-api-795c76cbcf-fzfwj      Stopping container api
+2m45s       Normal    Pulled              pod/inspectedge-api-6854dbdff6-vvdl9      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+2m45s       Normal    Created             pod/inspectedge-api-6854dbdff6-vvdl9      Container created
+2m45s       Normal    Started             pod/inspectedge-api-6854dbdff6-vvdl9      Container started
+2m45s       Normal    Scheduled           pod/inspectedge-api-6854dbdff6-vvdl9      Successfully assigned inspectedge/inspectedge-api-6854dbdff6-vvdl9 to minikube
+2m45s       Normal    SuccessfulCreate    replicaset/inspectedge-api-6854dbdff6     Created pod: inspectedge-api-6854dbdff6-vvdl9
+2m45s       Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-fzfwj
+2m40s       Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-fzfwj      Readiness probe failed: Get "http://10.244.0.18:8000/health/ready": dial tcp 10.244.0.18:8000: connect: connection refused
+105s        Warning   Unhealthy           pod/inspectedge-api-6854dbdff6-vvdl9      Startup probe failed: Get "http://10.244.0.22:8000/health/live": dial tcp 10.244.0.22:8000: connect: connection refused
+100s        Normal    Killing             pod/inspectedge-api-795c76cbcf-p27dr      Stopping container api
+100s        Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-p27dr
+100s        Normal    Scheduled           pod/inspectedge-api-6854dbdff6-88tf4      Successfully assigned inspectedge/inspectedge-api-6854dbdff6-88tf4 to minikube
+100s        Normal    SuccessfulCreate    replicaset/inspectedge-api-6854dbdff6     Created pod: inspectedge-api-6854dbdff6-88tf4
+99s         Normal    Pulled              pod/inspectedge-api-6854dbdff6-88tf4      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+99s         Normal    Created             pod/inspectedge-api-6854dbdff6-88tf4      Container created
+99s         Normal    Started             pod/inspectedge-api-6854dbdff6-88tf4      Container started
+39s         Warning   Unhealthy           pod/inspectedge-api-6854dbdff6-88tf4      Startup probe failed: Get "http://10.244.0.23:8000/health/live": dial tcp 10.244.0.23:8000: connect: connection refused
+34s         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-27l22
+34s         Normal    SuccessfulDelete    replicaset/inspectedge-api-795c76cbcf     Deleted pod: inspectedge-api-795c76cbcf-wgqpx
+34s         Normal    Created             pod/inspectedge-api-795c76cbcf-27l22      Container created
+34s         Normal    Pulled              pod/inspectedge-api-795c76cbcf-27l22      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+34s         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-27l22      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-27l22 to minikube
+34s         Normal    Started             pod/inspectedge-api-795c76cbcf-27l22      Container started
+34s         Normal    Killing             pod/inspectedge-api-795c76cbcf-wgqpx      Stopping container api
+28s         Normal    Killing             pod/inspectedge-api-6854dbdff6-88tf4      Stopping container api
+28s         Normal    SuccessfulDelete    replicaset/inspectedge-api-6854dbdff6     Deleted pod: inspectedge-api-6854dbdff6-88tf4
+28s         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-cspj9
+28s         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-cspj9      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-cspj9 to minikube
+28s         Normal    Pulled              pod/inspectedge-api-795c76cbcf-cspj9      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+28s         Normal    Created             pod/inspectedge-api-795c76cbcf-cspj9      Container created
+28s         Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-wgqpx      Readiness probe failed: Get "http://10.244.0.4:8000/health/ready": dial tcp 10.244.0.4:8000: connect: connection refused
+28s         Normal    Started             pod/inspectedge-api-795c76cbcf-cspj9      Container started
+23s         Warning   Unhealthy           pod/inspectedge-api-795c76cbcf-cspj9      Startup probe failed: Get "http://10.244.0.25:8000/health/live": dial tcp 10.244.0.25:8000: connect: connection refused
+18s         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-flmcm      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-flmcm to minikube
+18s         Normal    SuccessfulDelete    replicaset/inspectedge-api-6854dbdff6     Deleted pod: inspectedge-api-6854dbdff6-vvdl9
+18s         Normal    Killing             pod/inspectedge-api-6854dbdff6-vvdl9      Stopping container api
+18s         Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled up replica set inspectedge-api-795c76cbcf from 2 to 3
+18s         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-flmcm
+17s         Normal    Created             pod/inspectedge-api-795c76cbcf-flmcm      Container created
+17s         Normal    Pulled              pod/inspectedge-api-795c76cbcf-flmcm      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+17s         Normal    Started             pod/inspectedge-api-795c76cbcf-flmcm      Container started
+12s         Normal    ScalingReplicaSet   deployment/inspectedge-api                Scaled up replica set inspectedge-api-795c76cbcf from 3 to 4
+12s         Normal    Killing             pod/inspectedge-api-6854dbdff6-jbkgl      Stopping container api
+12s         Normal    Created             pod/inspectedge-api-795c76cbcf-9pd6q      Container created
+12s         Normal    Scheduled           pod/inspectedge-api-795c76cbcf-9pd6q      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-9pd6q to minikube
+12s         Normal    SuccessfulDelete    replicaset/inspectedge-api-6854dbdff6     Deleted pod: inspectedge-api-6854dbdff6-jbkgl
+12s         Normal    Started             pod/inspectedge-api-795c76cbcf-9pd6q      Container started
+12s         Normal    Pulled              pod/inspectedge-api-795c76cbcf-9pd6q      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+12s         Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-9pd6q
+6s          Normal    SuccessfulDelete    replicaset/inspectedge-api-6854dbdff6     Deleted pod: inspectedge-api-6854dbdff6-qgrrd
+6s          Normal    Killing             pod/inspectedge-api-6854dbdff6-qgrrd      Stopping container api
+6s          Normal    Started             pod/inspectedge-api-795c76cbcf-x6r6d      Container started
+6s          Normal    Created             pod/inspectedge-api-795c76cbcf-x6r6d      Container created
+6s          Normal    Pulled              pod/inspectedge-api-795c76cbcf-x6r6d      Container image "inspectedge-ai-model:0.2.0" already present on machine and can be accessed by the pod
+6s          Normal    Scheduled           pod/inspectedge-api-795c76cbcf-x6r6d      Successfully assigned inspectedge/inspectedge-api-795c76cbcf-x6r6d to minikube
+6s          Normal    SuccessfulCreate    replicaset/inspectedge-api-795c76cbcf     Created pod: inspectedge-api-795c76cbcf-x6r6d
+0s          Normal    ScalingReplicaSet   deployment/inspectedge-api                (combined from similar events): Scaled down replica set inspectedge-api-6854dbdff6 from 1 to 0
+0s          Normal    Killing             pod/inspectedge-api-6854dbdff6-frpd2      Stopping container api
+0s          Normal    SuccessfulDelete    replicaset/inspectedge-api-6854dbdff6     Deleted pod: inspectedge-api-6854dbdff6-frpd2

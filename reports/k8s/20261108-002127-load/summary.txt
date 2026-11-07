@@ -1,0 +1,13 @@
+=== InspectEdge load test (ramp) ===
+requests:    1212
+throughput:  2.88 req/s
+error rate:  0.00 %
+latency ms:  p50 2349.1 | p95 5316.3 | p99 6335.0 | max 6633.9
+K6_SUMMARY_JSON {"profile":"ramp","requests":1212,"throughput_rps":2.88,"error_rate":0,"latency_ms":{"p50":"2349.1","p90":"4325.3","p95":"5316.3","p99":"6335.0","max":"6633.9"}}
+
+=== HPA behaviour ===
+min replicas:              2
+peak replicas:             5
+first scale-up at:         124 s after start
+back to min after load:    292 s
+timeline:                  /Users/amish/inspectedge-ai/reports/k8s/20261108-002127-load/timeline.tsv
