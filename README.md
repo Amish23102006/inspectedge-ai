@@ -115,7 +115,7 @@ reports/                    model card; run reports are generated (git-ignored)
 | 4 Edge | ONNX export, parity, INT8 quantisation, CPU benchmark | ⬜ not started |
 | 5 Sensors | NASA CMAPSS RUL baselines | ⬜ not started |
 | 6 Portfolio quality | Docker, CI, model card, security checks | 🟡 partial |
-| 6b Kubernetes | Probes, HPA, metrics, load + recovery tests on minikube | ✅ code / ⏳ measured run |
+| 6b Kubernetes | Probes, HPA, metrics, load + recovery tests on minikube | ✅ measured (docs/results.md) |
 | 7 Research | VisA external validation, ablations | ⬜ not started |
 
 ## Security, privacy and limitations

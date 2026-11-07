@@ -33,7 +33,7 @@ kubectl -n "$NS" get hpa inspectedge-api
 start_k6 ramp "$MAX_VUS"
 
 log "load running (~7.5 min). Live view in another terminal:"
-log "  kubectl -n $NS get hpa -w      |   kubectl -n $NS top pods"
+log "  while true; do clear; kubectl -n $NS get hpa,pods; kubectl -n $NS top pods; sleep 5; done"
 while ! kubectl -n "$NS" get job k6-ramp \
         -o jsonpath='{.status.conditions[*].type}' 2>/dev/null | grep -qE 'Complete|Failed'; do
   sample; tail -1 "$TL"; sleep 10

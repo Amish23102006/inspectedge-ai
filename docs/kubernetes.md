@@ -67,8 +67,8 @@ The same steps are available as `make k8s-up k8s-build k8s-deploy k8s-smoke k8s-
 Useful while it runs (second terminal):
 
 ```bash
-kubectl -n inspectedge get pods,hpa -w
-kubectl -n inspectedge top pods
+# refreshes HPA, pods and per-pod CPU/memory every 5 s (Ctrl+C to stop)
+while true; do clear; date; kubectl -n inspectedge get hpa,pods; echo; kubectl -n inspectedge top pods; sleep 5; done
 kubectl -n inspectedge get endpointslices -o wide
 ```
 
@@ -114,6 +114,10 @@ The 250m / 512Mi request and 1 CPU / 1Gi limit are starting values. After the lo
 - **No auth, no TLS, no Ingress.** Access is via `kubectl port-forward` only. Don't expose it.
 - **Single-node cluster.** Scaling shows scheduling and load balancing, not resilience to node
   failure. The HPA scales on CPU only.
+- **Uneven load on new pods.** k6 keeps HTTP connections open, and kube-proxy balances per
+  connection, not per request. Pods added by the HPA mid-test only get traffic from new
+  connections, so one new pod stayed almost idle in the measured run (see `docs/results.md`).
+  A real client mix, or an L7 load balancer / service mesh, spreads requests more evenly.
 - **CI** (`.github/workflows/ci.yml`, job `k8s-smoke`) deploys the image *without* a model on
   kind (MVTec isn't redistributed), so it checks apply, probes, Service routing, self-healing and
   HPA metrics, not inference. Load and recovery numbers come from local runs.
