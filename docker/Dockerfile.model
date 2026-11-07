@@ -1,0 +1,13 @@
+# Serving image = base image + one trained model artefact (immutable, versioned together).
+# The build context is the artefact directory printed by `make eval`, e.g.:
+#   docker build -f docker/Dockerfile.model \
+#     --build-arg BASE_IMAGE=inspectedge-ai:0.2.0 \
+#     -t inspectedge-ai-model:0.2.0 artefacts/<model_id>
+# scripts/k8s/build-images.sh does this for you.
+#
+# This image contains weights learned from MVTec AD (CC BY-NC-SA 4.0, non-commercial).
+# Keep it in your local cluster; do not push it to a public registry.
+ARG BASE_IMAGE=inspectedge-ai:0.2.0
+FROM ${BASE_IMAGE}
+COPY . /app/model
+ENV INSPECTEDGE_ARTEFACT_DIR=/app/model

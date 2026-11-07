@@ -1,0 +1,58 @@
+# In-cluster k6 run. Created by scripts/k8s/load-test.sh and scripts/k8s/recovery-test.sh,
+# which first create the `k6-load` ConfigMap (k6.js + sample.png) and fill in PROFILE etc.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k6-${PROFILE}
+  namespace: inspectedge
+  labels:
+    app.kubernetes.io/name: k6
+    app.kubernetes.io/part-of: inspectedge-ai
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: k6
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 12345
+        runAsGroup: 12345
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: k6
+          image: grafana/k6:1.0.0
+          args: ["run", "--quiet", "/load/k6.js"]
+          env:
+            - name: PROFILE
+              value: "${PROFILE}"
+            - name: MAX_VUS
+              value: "${MAX_VUS}"
+            - name: RATE
+              value: "${RATE}"
+            - name: DURATION
+              value: "${DURATION}"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: load
+              mountPath: /load
+              readOnly: true
+      volumes:
+        - name: load
+          configMap:
+            name: k6-load

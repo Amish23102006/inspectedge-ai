@@ -44,6 +44,15 @@ class AuditStore:
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
+    def ping(self) -> bool:
+        """Cheap readiness check: the DB file opens and answers a trivial query."""
+        try:
+            with closing(self._connect()) as c:
+                c.execute("SELECT 1").fetchone()
+            return True
+        except sqlite3.Error:
+            return False
+
     def save_inspection(self, r: InspectionResponse) -> None:
         with closing(self._connect()) as c, c:
             c.execute(
