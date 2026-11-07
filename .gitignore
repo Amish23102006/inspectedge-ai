@@ -22,3 +22,8 @@ mlruns/
 .ipynb_checkpoints/
 .DS_Store
 Thumbs.db
+.env
+.venv/
+venv/
+node_modules/
+__pycache__/
