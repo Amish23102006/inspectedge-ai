@@ -59,10 +59,18 @@ jobs:
       - name: Deleted pod is recreated
         run: |
           POD=$(kubectl -n $NS get pods -l app.kubernetes.io/name=inspectedge-api -o jsonpath='{.items[0].metadata.name}')
-          kubectl -n $NS delete pod "$POD" --wait=false
-          sleep 3
+          # Wait until the old pod is fully gone (a terminating pod never turns Ready again),
+          # then require the Deployment to be back to all replicas ready.
+          kubectl -n $NS delete pod "$POD" --wait=true --timeout=120s
           kubectl -n $NS rollout status deployment/inspectedge-api --timeout=180s
-          kubectl -n $NS wait --for=condition=Ready pod -l app.kubernetes.io/name=inspectedge-api --timeout=180s
+          for i in $(seq 60); do
+            READY=$(kubectl -n $NS get deploy inspectedge-api -o jsonpath='{.status.readyReplicas}')
+            WANT=$(kubectl -n $NS get deploy inspectedge-api -o jsonpath='{.spec.replicas}')
+            [ "$READY" = "$WANT" ] && break; sleep 3
+          done
+          kubectl -n $NS get pods -o wide
+          test "$READY" = "$WANT"
+          ! kubectl -n $NS get pod "$POD" >/dev/null 2>&1
       - name: Unready pod leaves Service endpoints without restarting
         run: |
           POD=$(kubectl -n $NS get pods -l app.kubernetes.io/name=inspectedge-api -o jsonpath='{.items[0].metadata.name}')
