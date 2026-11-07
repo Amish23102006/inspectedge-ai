@@ -17,4 +17,4 @@ flowchart LR
       kl["kubelet probes<br/>startup + liveness: /health/live<br/>readiness: /health/ready"] --> p1
       prom["Prometheus (optional)<br/>scrapes /metrics"] -.-> p1
     end
-    img -->|minikube docker-env| dep
+    img -->|minikube image load| dep

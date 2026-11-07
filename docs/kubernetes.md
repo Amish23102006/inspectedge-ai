@@ -54,7 +54,7 @@ make prepare eval                      # prints: Artefact: artefacts/<model_id>
 
 ```bash
 scripts/k8s/cluster-up.sh       # minikube (4 CPU, 6 GB) + Metrics Server
-scripts/k8s/build-images.sh     # builds base + model image inside minikube (no registry)
+scripts/k8s/build-images.sh     # builds base + model image, loads it into minikube (no registry)
 scripts/k8s/deploy.sh           # kubectl apply -k k8s/, waits for Ready pods and HPA metrics
 scripts/k8s/smoke-test.sh       # health, readiness, metrics, one real /inspect
 scripts/k8s/load-test.sh        # ~7.5 min ramp + scale-down watch → reports/k8s/<ts>-load/
