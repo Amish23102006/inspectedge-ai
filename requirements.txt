@@ -1,0 +1,7 @@
+# Streamlit Community Cloud install for the hosted demo (streamlit_app.py).
+# CPU-only PyTorch: the default PyPI wheels pull in ~2 GB of CUDA libraries.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.7.1+cpu
+torchvision==0.22.1+cpu
+huggingface_hub>=0.24
+-e .[api,dashboard]
