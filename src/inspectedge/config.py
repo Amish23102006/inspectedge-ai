@@ -84,12 +84,14 @@ class QualityConfig(_Strict):
 class ScopeConfig(_Strict):
     """Out-of-scope gate: refuse to score images unlike the training setup.
 
-    threshold = margin * quantile(held-out normal distances); test data is never used.
+    threshold = margin * quantile(distances of held-out normals + synthetic defects made from
+    them); test data is never used.
     """
 
     enabled: bool = True
     quantile: float = Field(1.0, gt=0, le=1)
     margin: float = Field(1.5, ge=1.0)
+    synthetic_defects_per_image: int = Field(4, ge=0, le=50)
 
 
 class UploadConfig(_Strict):
