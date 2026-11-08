@@ -2,6 +2,8 @@
 
 **Explainable industrial anomaly detection with human review, reproducible evaluation and (planned) edge benchmarking.**
 
+**▶ Live demo: [amish-inspectedge-ai.streamlit.app](https://amish-inspectedge-ai.streamlit.app)**: pick a sample bottle image (or upload one) and get a decision, heatmap and audit trail. The first visit after a restart trains the model (~8 min); later visits are instant.
+
 > ⚠️ Research / portfolio prototype trained on public data. Not validated for production rejection or safety-critical decisions. A human reviewer always makes the final disposition.
 
 ## Problem
@@ -98,18 +100,20 @@ reports/                    model card; run reports are generated (git-ignored)
 
 ## Results
 
-**No results yet.** Results are added here only after a run exists in `reports/runs/` with its dataset, split, seed, config hash, command and environment. Do not put any metric on a CV that is not backed by such a report.
+Every number below comes from a recorded run with its dataset, split, seed, config hash, command and environment. Reproduce it with the manual **Evaluate (MVTec AD)** workflow (`.github/workflows/eval.yml`) or `make eval` locally.
 
 | Category | Method | Image AUROC (95% CI) | Image AUPR | Pixel AUROC | False alarms / 100 @ pass thr. | Missed anomalies routed to PASS | Report |
 |---|---|---|---|---|---|---|---|
-| – | – | not yet measured | – | – | – | – | – |
+| bottle | Baseline A: kNN patch features (ResNet-18 layer2+3) | 1.000 (1.000–1.000) | 1.000 | 0.983 | 6.0 | 0 of 63 | [report](reports/evaluations/knn_patch-bottle-6016e191570e.json) · [run](https://github.com/Amish23102006/inspectedge-ai/actions/runs/42523327695) |
+
+**Reading these numbers honestly:** the test set is small (83 images: 20 normal, 63 defective) and *bottle* is one of the easier MVTec AD categories, so image AUROC saturates at 1.0 and the CI is degenerate. The operationally useful figures are the threshold ones: at the pass threshold no defective bottle is passed, while 5 of 20 normal bottles are not auto-passed (3 sent to manual review, 2 flagged as likely anomalies; 6.0 false alarms per 100 images). Thresholds were calibrated only on 42 held-out normal images; the test set was never used to choose them. Results on one category say nothing about other categories or real factory images.
 
 ## Project status
 
 | Phase | Deliverable | Status |
 |---|---|---|
 | 0 Design | README, data licence, architecture, ADR | ✅ |
-| 1 Vision MVP | One category, two baselines, heatmap, metrics, report | ✅ code / ⏳ run on real data |
+| 1 Vision MVP | One category, two baselines, heatmap, metrics, report | ✅ Baseline A measured on *bottle* / ⏳ Baseline B run |
 | 2 Workflow | API, dashboard, three-way decision, review, audit | ✅ MVP |
 | 3 Robustness | Lighting / blur / contrast / shift tests | ⬜ not started |
 | 4 Edge | ONNX export, parity, INT8 quantisation, CPU benchmark | ⬜ not started |
