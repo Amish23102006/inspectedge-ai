@@ -56,12 +56,12 @@ if res:
     getattr(st, kind)(f"{icon} **{res['decision']}** — human review required for final disposition")
 
     c1, c2, c3 = st.columns([1, 1, 1])
-    c1.image(st.session_state["image"], caption="Original", use_container_width=True)
+    c1.image(st.session_state["image"], caption="Original", width="stretch")
     if res["heatmap_uri"]:
         c2.image(
             requests.get(API + res["heatmap_uri"], timeout=10).content,
             caption="Anomaly heatmap (fixed scale)",
-            use_container_width=True,
+            width="stretch",
         )
     else:
         c2.info("No heatmap: input failed the quality gate.")
