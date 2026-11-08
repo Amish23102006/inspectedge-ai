@@ -33,10 +33,12 @@ quality:
 
 scope:
   # Out-of-scope gate: images whose global embedding is far from every training image are not
-  # scored (decision OUT_OF_SCOPE). Threshold = margin * quantile of held-out NORMAL distances.
+  # scored (decision OUT_OF_SCOPE). Threshold = margin * quantile of the distances of held-out
+  # NORMAL images plus synthetic defects made from them (normals alone would reject real defects).
   enabled: true
   quantile: 1.0
   margin: 1.5
+  synthetic_defects_per_image: 4
 
 upload:
   max_bytes: 10485760            # 10 MB
