@@ -1,11 +1,14 @@
 """Streamlit reviewer dashboard. Run: streamlit run dashboard/app.py (API must be running)."""
 
 import os
+from pathlib import Path
 
 import requests
 import streamlit as st
 
 API = os.environ.get("INSPECTEDGE_API_URL", "http://localhost:8000")
+# Optional folder of demo images (used by the hosted demo, streamlit_app.py).
+SAMPLES_DIR = os.environ.get("INSPECTEDGE_SAMPLES_DIR")
 DECISION_STYLE = {
     "PASS": ("✅", "success"),
     "MANUAL_REVIEW": ("🟡", "warning"),
@@ -30,12 +33,18 @@ if not health["model_loaded"]:
 else:
     st.caption(f"Model: `{health['model_version']}` · category: `{health['category']}`")
 
+source = None
+samples = sorted(Path(SAMPLES_DIR).glob("*.png")) if SAMPLES_DIR else []
+if samples:
+    choice = st.selectbox("Try a sample image", ["(none)"] + [p.name for p in samples])
+    if choice != "(none)":
+        source = (choice, (Path(SAMPLES_DIR) / choice).read_bytes(), "image/png")
 uploaded = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
-if uploaded and st.button("Inspect", type="primary", disabled=not health["model_loaded"]):
-    data = uploaded.getvalue()
-    r = requests.post(
-        f"{API}/inspect", files={"file": (uploaded.name, data, uploaded.type)}, timeout=120
-    )
+if uploaded:
+    source = (uploaded.name, uploaded.getvalue(), uploaded.type)
+if source and st.button("Inspect", type="primary", disabled=not health["model_loaded"]):
+    name, data, content_type = source
+    r = requests.post(f"{API}/inspect", files={"file": (name, data, content_type)}, timeout=120)
     if r.ok:
         st.session_state.update(result=r.json(), image=data)
     else:
