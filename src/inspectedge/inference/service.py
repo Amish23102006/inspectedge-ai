@@ -1,4 +1,4 @@
-"""Inspection service: validate -> quality gate -> model -> deterministic decision -> heatmap."""
+"""Inspection service: validate -> quality gate -> scope gate -> model -> decision -> heatmap."""
 
 from __future__ import annotations
 
@@ -15,8 +15,9 @@ from inspectedge.inference.uploads import decode_upload
 from inspectedge.inference.visualize import overlay, save_rgb_png
 from inspectedge.policy.decision import decide
 from inspectedge.quality.gate import assess_quality
+from inspectedge.quality.scope import ScopeGate
 from inspectedge.repro import sha256_bytes
-from inspectedge.schemas import InspectionResponse, ModelVersion, Thresholds, utcnow
+from inspectedge.schemas import InspectionResponse, ModelVersion, ScopeReport, Thresholds, utcnow
 from inspectedge.vision.base import AnomalyModel
 
 
@@ -28,6 +29,7 @@ class InspectionService:
     category: str
     cfg: AppConfig
     heatmap_dir: Path
+    scope_gate: ScopeGate | None = None
 
     def __post_init__(self) -> None:
         self.heatmap_dir = Path(self.heatmap_dir)
@@ -44,16 +46,21 @@ class InspectionService:
         quality = assess_quality(resized, self.cfg.quality)
         inspection_id = str(uuid.uuid4())
 
+        scope: ScopeReport | None = None
+        if quality.passed and self.scope_gate is not None:
+            scope = self.scope_gate.assess(resized[None])[0]
+        in_scope = scope is None or scope.in_scope
+
         score: float | None = None
         heatmap_uri: str | None = None
-        if quality.passed:  # never score an image the gate rejected
+        if quality.passed and in_scope:  # never score an image a gate rejected
             scores, maps = self.model.predict(resized[None])
             score = float(scores[0])
             vis = overlay(resized, maps[0], 0.0, self.thresholds.likely_anomaly_threshold)
             save_rgb_png(self.heatmap_path(inspection_id), vis)
             heatmap_uri = f"/heatmaps/{inspection_id}"
 
-        decision = decide(score, quality.passed, self.thresholds)
+        decision = decide(score, quality.passed, self.thresholds, in_scope)
         return InspectionResponse(
             inspection_id=inspection_id,
             created_at=utcnow(),
@@ -65,6 +72,7 @@ class InspectionService:
             thresholds=self.thresholds,
             decision=decision,
             quality=quality,
+            scope=scope,
             heatmap_uri=heatmap_uri,
             latency_ms=round((time.perf_counter() - t0) * 1000, 3),
         )
@@ -82,6 +90,7 @@ def load_service(artefact_dir: str | Path, cfg: AppConfig) -> InspectionService:
             f"config {cfg.preprocessing_version}"
         )
     model: AnomalyModel
+    ext = None
     if mv.method == "knn_patch":
         from inspectedge.vision.features import TorchvisionFeatureExtractor
         from inspectedge.vision.knn_baseline import KnnPatchModel
@@ -94,6 +103,22 @@ def load_service(artefact_dir: str | Path, cfg: AppConfig) -> InspectionService:
         model = AutoencoderModel.load(d, cfg.model.device)
     else:
         raise ValueError(f"unknown method {mv.method}")
+
+    gate = None
+    if cfg.scope.enabled and ScopeGate.exists(d):  # older artefacts have no gate: serve without
+        if ext is None:
+            from inspectedge.vision.features import TorchvisionFeatureExtractor
+
+            ext = TorchvisionFeatureExtractor(
+                cfg.model.backbone, cfg.model.layers, cfg.model.device
+            )
+        gate = ScopeGate.load(d, ext)
     return InspectionService(
-        model, thresholds, mv.model_id, mv.category, cfg, Path(cfg.paths.artefacts) / "heatmaps"
+        model,
+        thresholds,
+        mv.model_id,
+        mv.category,
+        cfg,
+        Path(cfg.paths.artefacts) / "heatmaps",
+        scope_gate=gate,
     )
