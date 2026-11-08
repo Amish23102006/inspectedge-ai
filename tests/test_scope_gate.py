@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from inspectedge.quality.scope import ScopeGate
+from inspectedge.quality.scope import ScopeGate, synthetic_defects
 
 
 def rgb_mean_extractor(images: np.ndarray) -> np.ndarray:
@@ -34,9 +34,28 @@ def test_unrelated_image_is_out_of_scope(gate):
     assert not r.in_scope and r.distance > r.threshold
 
 
+def test_synthetic_defects_are_local_and_deterministic():
+    imgs = grey_parts(3)
+    a = synthetic_defects(imgs, 2, seed=7)
+    assert a.shape == (6, 32, 32, 3) and a.dtype == np.uint8
+    np.testing.assert_array_equal(a, synthetic_defects(imgs, 2, seed=7))
+    changed = (a != np.repeat(imgs, 2, axis=0)).any(axis=3).mean(axis=(1, 2))
+    assert np.all(changed < 0.9)  # corruptions stay local
+
+
+def test_synthetic_defects_widen_threshold():
+    normals_only = ScopeGate(rgb_mean_extractor).fit(
+        grey_parts(10), grey_parts(5, seed=1), 1.0, 1.5, synthetic_per_image=0
+    )
+    with_synth = ScopeGate(rgb_mean_extractor).fit(
+        grey_parts(10), grey_parts(5, seed=1), 1.0, 1.5, synthetic_per_image=4
+    )
+    assert with_synth.threshold > normals_only.threshold
+
+
 def test_threshold_from_validation_only_and_round_trip(gate, tmp_path):
     assert gate.threshold is not None and gate.threshold > 0
-    assert "n=5" in gate.calibration
+    assert "5 held-out normals" in gate.calibration
     gate.save(tmp_path)
     assert ScopeGate.exists(tmp_path)
     loaded = ScopeGate.load(tmp_path, rgb_mean_extractor)
