@@ -146,7 +146,12 @@ def main(argv: list[str] | None = None) -> int:
     scope_metrics: dict = {"enabled": False}
     if cfg.scope.enabled:
         gate = ScopeGate(scope_extractor(cfg, model)).fit(
-            x_train, x_val, cfg.scope.quantile, cfg.scope.margin
+            x_train,
+            x_val,
+            cfg.scope.quantile,
+            cfg.scope.margin,
+            cfg.scope.synthetic_defects_per_image,
+            cfg.project.seed,
         )
         test_scope = gate.assess(x_test)
         in_scope = [r.in_scope for r in test_scope]
