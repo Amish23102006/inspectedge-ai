@@ -7,11 +7,14 @@ from inspectedge.schemas import (
     HumanReviewCreate,
     InspectionResponse,
     QualityReport,
+    ScopeReport,
     utcnow,
 )
 
 GOOD_Q = QualityReport(passed=True, blur_variance=100, brightness=120, contrast=40)
 BAD_Q = QualityReport(passed=False, blur_variance=1, brightness=120, contrast=2, warnings=["BLUR"])
+OUT = ScopeReport(in_scope=False, distance=0.4, threshold=0.05)
+IN = ScopeReport(in_scope=True, distance=0.01, threshold=0.05)
 
 
 def _resp(thresholds, **kw):
@@ -45,6 +48,19 @@ def test_recapture_allows_missing_score(thresholds):
         thresholds, decision=Decision.RECAPTURE, anomaly_score=None, quality=BAD_Q, heatmap_uri=None
     )
     assert r.anomaly_score is None
+
+
+def test_out_of_scope_requires_unscored_out_of_scope_report(thresholds):
+    oos = dict(decision=Decision.OUT_OF_SCOPE, anomaly_score=None, scope=OUT, heatmap_uri=None)
+    assert _resp(thresholds, **oos).scope == OUT
+    for bad in (
+        {"scope": None},
+        {"scope": IN},
+        {"anomaly_score": 3.0},
+        {"quality": BAD_Q},
+    ):
+        with pytest.raises(ValidationError):
+            _resp(thresholds, **{**oos, **bad})
 
 
 @pytest.mark.parametrize(

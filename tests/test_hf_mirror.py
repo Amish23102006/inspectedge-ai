@@ -28,3 +28,14 @@ def test_jobs_rebuild_mvtec_layout():
         ("data/b/002-9.png", root / "test" / "broken_large" / "002-9.png"),
         ("fields/m/002_mask-3.png", root / "ground_truth" / "broken_large" / "002-9_mask.png"),
     ]
+
+
+def test_jobs_can_restrict_to_test_split():
+    root = Path("root/bottle")
+    samples = [
+        _sample("data/a/001-1.png", "bottle", "train", "good"),
+        _sample("data/b/002-9.png", "bottle", "test", "good"),
+    ]
+    assert _jobs(samples, "bottle", root, splits=("test",)) == [
+        ("data/b/002-9.png", root / "test" / "good" / "002-9.png")
+    ]

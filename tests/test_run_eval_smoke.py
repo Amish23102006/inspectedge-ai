@@ -33,10 +33,12 @@ def test_run_eval_writes_report_and_artefact(mvtec_tree, tmp_path, monkeypatch):
     prov = report["provenance"]
     assert prov["split"]["train"] == 8 and prov["split"]["test_anomalous"] == 2
     assert prov["anomalous_masks_missing"] == 1
-    assert {"image_auroc", "pixel_auroc", "decisions"} <= report["metrics"].keys()
+    assert {"image_auroc", "pixel_auroc", "decisions", "scope_gate"} <= report["metrics"].keys()
+    assert report["metrics"]["scope_gate"]["enabled"] is True
     assert list((report_dir / "gallery").glob("*.png"))
 
     (art_dir,) = (tmp_path / "art/models").iterdir()
     meta = json.loads((art_dir / "model_version.json").read_text())
     assert meta["model_version"]["dataset"] == "MVTec AD"
     assert meta["thresholds"]["pass_threshold"] <= meta["thresholds"]["likely_anomaly_threshold"]
+    assert (art_dir / "scope_gate.json").exists() and (art_dir / "scope_reference.npy").exists()
