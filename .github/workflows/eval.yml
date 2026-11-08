@@ -34,7 +34,7 @@ jobs:
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           python -c "import glob,json;r=json.load(open(glob.glob('reports/runs/*/metrics.json')[0]));r.pop('error_gallery',None);r['provenance'].pop('config',None);print(json.dumps(r,indent=1))" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: eval-report
           path: reports/runs/*/metrics.json
