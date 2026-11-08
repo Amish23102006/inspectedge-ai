@@ -1,4 +1,5 @@
-"""Deterministic three-way decision policy (+ RECAPTURE for poor input quality).
+"""Deterministic three-way decision policy (+ RECAPTURE for poor input quality and
+OUT_OF_SCOPE for images unlike the training setup).
 
 The model produces a score; this module alone turns it into a decision. No generative model
 is involved. Human review remains required for the final disposition.
@@ -14,9 +15,13 @@ import numpy as np
 from inspectedge.schemas import Decision, Thresholds
 
 
-def decide(score: float | None, quality_passed: bool, thresholds: Thresholds) -> Decision:
+def decide(
+    score: float | None, quality_passed: bool, thresholds: Thresholds, in_scope: bool = True
+) -> Decision:
     if not quality_passed:
         return Decision.RECAPTURE
+    if not in_scope:
+        return Decision.OUT_OF_SCOPE
     if score is None or not math.isfinite(score):
         raise ValueError(f"a finite anomaly score is required when quality passed, got {score!r}")
     if score < thresholds.pass_threshold:
