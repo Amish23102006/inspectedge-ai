@@ -1,0 +1,79 @@
+{
+  "source_run": "https://github.com/Amish23102006/inspectedge-ai/actions/runs/42523327695",
+  "note": "Copied from the run summary of the 'Evaluate (MVTec AD)' workflow. Error-gallery images and the full config are omitted (MVTec AD is not redistributed); the config is configs/default.yaml at the commit below.",
+  "provenance": {
+    "model_id": "knn_patch-bottle-6016e191570e",
+    "dataset": "MVTec AD (CC BY-NC-SA 4.0)",
+    "category": "bottle",
+    "data_root": "data/raw/mvtec_ad",
+    "split": {
+      "train": 167,
+      "val_normal_for_calibration": 42,
+      "test_normal": 20,
+      "test_anomalous": 63,
+      "val_fraction": 0.2
+    },
+    "anomalous_masks_missing": 0,
+    "seed": 42,
+    "config_hash": "6016e191570e",
+    "command": "python -m inspectedge.evaluation.run_eval --method knn_patch",
+    "environment": {
+      "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+      "processor": "x86_64",
+      "python": "3.11.18",
+      "numpy": "2.4.6",
+      "torch": "2.7.1+cpu",
+      "git_commit": "98ecbd051e25efe61708f78726ed4b0726b26f88"
+    },
+    "thresholds": {
+      "pass_threshold": 1.432401967048645,
+      "likely_anomaly_threshold": 1.5509476810693743,
+      "calibration": "normal-val quantiles p=0.95, l=0.995, n=42"
+    }
+  },
+  "metrics": {
+    "image_auroc": 1,
+    "image_aupr": 0.9999999999999998,
+    "image_auroc_95ci_bootstrap": [
+      0.9999999999999999,
+      1
+    ],
+    "pixel_auroc": 0.9827364262682793,
+    "at_pass_threshold": {
+      "threshold": 1.432401967048645,
+      "tp": 63,
+      "fp": 5,
+      "fn": 0,
+      "tn": 15,
+      "precision": 0.9264705882352942,
+      "recall": 1,
+      "f1": 0.9618320610687023,
+      "false_alarms_per_100_images": 6.024096385542169
+    },
+    "at_likely_anomaly_threshold": {
+      "threshold": 1.5509476810693743,
+      "tp": 63,
+      "fp": 2,
+      "fn": 0,
+      "tn": 18,
+      "precision": 0.9692307692307692,
+      "recall": 1,
+      "f1": 0.9843749999999999,
+      "false_alarms_per_100_images": 2.4096385542168677
+    },
+    "decisions": {
+      "n_images": 83,
+      "pass_rate": 0.18072289156626506,
+      "manual_review_rate": 0.03614457831325301,
+      "likely_anomaly_rate": 0.7831325301204819,
+      "recapture_rate": 0,
+      "missed_anomalies_passed": 0,
+      "normals_flagged_likely_anomaly": 2
+    },
+    "timing": {
+      "fit_seconds": 3.466065407000002,
+      "batch_predict_ms_per_image": 194.59600785542176,
+      "note": "batch timing on eval machine; NOT an edge latency benchmark"
+    }
+  }
+}
