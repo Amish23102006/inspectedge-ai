@@ -1,18 +1,27 @@
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
 from api.main import create_app
 from inspectedge.audit.store import AuditStore
 from inspectedge.inference.service import InspectionService
+from inspectedge.quality.scope import ScopeGate
 from tests.conftest import FakeModel, flat_image, noise_image, png_bytes
+from tests.test_scope_gate import grey_parts, rgb_mean_extractor
 
 
-def make_client(cfg, thresholds, score=0.5, with_model=True):
+def make_client(cfg, thresholds, score=0.5, with_model=True, scope_gate=None):
     svc = None
     model = FakeModel(score)
     if with_model:
         svc = InspectionService(
-            model, thresholds, "fake-bottle-test", "bottle", cfg, cfg.paths.artefacts / "heatmaps"
+            model,
+            thresholds,
+            "fake-bottle-test",
+            "bottle",
+            cfg,
+            cfg.paths.artefacts / "heatmaps",
+            scope_gate=scope_gate,
         )
     app = create_app(service=svc, store=AuditStore(cfg.paths.db), cfg=cfg)
     return TestClient(app), model
@@ -91,3 +100,27 @@ def test_heatmap_path_traversal_rejected(cfg, thresholds):
     client, _ = make_client(cfg, thresholds)
     assert client.get("/heatmaps/..%2F..%2Fetc%2Fpasswd").status_code in (404, 422)
     assert client.get("/heatmaps/not-a-uuid").status_code == 422
+
+
+def _grey_gate():
+    return ScopeGate(rgb_mean_extractor).fit(grey_parts(10), grey_parts(5, seed=1), 1.0, 1.5)
+
+
+def test_out_of_scope_image_is_not_scored(cfg, thresholds):
+    client, model = make_client(cfg, thresholds, score=99.0, scope_gate=_grey_gate())
+    img = noise_image()
+    img[..., 1:] //= 4  # strongly red-tinted: unlike the grey training "setup"
+    body = upload(client, png_bytes(img)).json()
+    assert body["decision"] == "OUT_OF_SCOPE"
+    assert body["anomaly_score"] is None and body["heatmap_uri"] is None
+    assert body["scope"]["in_scope"] is False
+    assert body["scope"]["distance"] > body["scope"]["threshold"]
+    assert model.calls == 0
+
+
+def test_in_scope_image_is_scored(cfg, thresholds):
+    client, model = make_client(cfg, thresholds, score=0.5, scope_gate=_grey_gate())
+    img = np.clip(np.random.default_rng(3).normal(120, 30, (256, 256, 3)), 0, 255)
+    body = upload(client, png_bytes(img.astype(np.uint8))).json()
+    assert body["decision"] == "PASS" and body["scope"]["in_scope"] is True
+    assert model.calls == 1

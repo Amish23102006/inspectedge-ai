@@ -74,9 +74,11 @@ def decision_metrics(labels: np.ndarray, decisions: Sequence[Decision]) -> dict[
         "manual_review_rate": float(np.mean(d == "MANUAL_REVIEW")),
         "likely_anomaly_rate": float(np.mean(d == "LIKELY_ANOMALY")),
         "recapture_rate": float(np.mean(d == "RECAPTURE")),
+        "out_of_scope_rate": float(np.mean(d == "OUT_OF_SCOPE")),
         # Worst operational error: an anomalous part auto-routed to PASS.
         "missed_anomalies_passed": int(np.sum(labels & (d == "PASS"))),
         "normals_flagged_likely_anomaly": int(np.sum(~labels & (d == "LIKELY_ANOMALY"))),
+        "anomalies_routed_out_of_scope": int(np.sum(labels & (d == "OUT_OF_SCOPE"))),
     }
 
 

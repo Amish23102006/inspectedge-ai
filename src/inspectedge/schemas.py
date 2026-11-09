@@ -28,6 +28,7 @@ class Decision(str, Enum):
     MANUAL_REVIEW = "MANUAL_REVIEW"
     LIKELY_ANOMALY = "LIKELY_ANOMALY"
     RECAPTURE = "RECAPTURE"
+    OUT_OF_SCOPE = "OUT_OF_SCOPE"
 
 
 class Disposition(str, Enum):
@@ -64,6 +65,18 @@ class QualityReport(_Base):
     warnings: list[str] = Field(default_factory=list)
 
 
+class ScopeReport(_Base):
+    """Does the image resemble the inspection setup the model was trained on?
+
+    distance: cosine distance from the image's global embedding to the nearest training image.
+    threshold: calibrated on held-out normal images only; in_scope = distance <= threshold.
+    """
+
+    in_scope: bool
+    distance: float = Field(ge=0)
+    threshold: float = Field(ge=0)
+
+
 class InspectionResponse(_Base):
     inspection_id: str
     created_at: datetime
@@ -75,6 +88,7 @@ class InspectionResponse(_Base):
     thresholds: Thresholds
     decision: Decision
     quality: QualityReport
+    scope: ScopeReport | None = None
     heatmap_uri: str | None
     latency_ms: float = Field(ge=0)
     human_review_required: Literal[True] = True
@@ -87,8 +101,15 @@ class InspectionResponse(_Base):
         if self.decision is Decision.RECAPTURE:
             if self.quality.passed:
                 raise ValueError("RECAPTURE is only valid when the input-quality gate failed")
+        elif self.decision is Decision.OUT_OF_SCOPE:
+            if not self.quality.passed or self.scope is None or self.scope.in_scope:
+                raise ValueError(
+                    "OUT_OF_SCOPE requires a passed quality gate and an out-of-scope report"
+                )
+            if self.anomaly_score is not None:
+                raise ValueError("an OUT_OF_SCOPE image is not scored")
         elif self.anomaly_score is None:
-            raise ValueError("anomaly_score is required unless decision is RECAPTURE")
+            raise ValueError("anomaly_score is required unless decision is RECAPTURE/OUT_OF_SCOPE")
         return self
 
 

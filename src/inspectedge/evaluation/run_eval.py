@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 
 from inspectedge.config import AppConfig, config_hash, load_config
-from inspectedge.data.mvtec import Sample, find_leakage, index_category, load_split
+from inspectedge.data.mvtec import Sample, find_leakage, index_category, load_image, load_split
 from inspectedge.evaluation.metrics import (
     bootstrap_auroc_ci,
     decision_metrics,
@@ -28,6 +28,7 @@ from inspectedge.evaluation.metrics import (
 from inspectedge.inference.visualize import overlay, save_rgb_png
 from inspectedge.policy.decision import calibrate_thresholds, decide
 from inspectedge.quality.gate import assess_quality
+from inspectedge.quality.scope import ScopeGate
 from inspectedge.repro import environment_info, set_seed
 from inspectedge.schemas import ModelVersion, Thresholds
 
@@ -43,6 +44,32 @@ def build_model(cfg: AppConfig):
     from inspectedge.vision.autoencoder import AutoencoderModel
 
     return AutoencoderModel(m.ae_epochs, m.ae_batch_size, m.ae_lr, cfg.project.seed, m.device)
+
+
+def scope_extractor(cfg: AppConfig, model):
+    """Reuse the kNN model's backbone; other methods get the same pretrained backbone."""
+    if getattr(model, "extractor", None) is not None:
+        return model.extractor
+    from inspectedge.vision.features import TorchvisionFeatureExtractor
+
+    return TorchvisionFeatureExtractor(cfg.model.backbone, cfg.model.layers, cfg.model.device)
+
+
+def ood_rejection(gate: ScopeGate, root: Path, categories: list[str], size: int) -> dict:
+    """Share of other categories' test images (normal + defective) the scope gate turns away."""
+    out: dict[str, dict] = {}
+    for cat in categories:
+        paths = sorted((root / cat / "test").glob("*/*.png"))
+        if not paths:
+            out[cat] = {"n_images": 0, "note": "category not downloaded"}
+            continue
+        d = gate.distances(np.stack([load_image(p, size) for p in paths]))
+        out[cat] = {
+            "n_images": len(paths),
+            "rejected_rate": float(np.mean(d > gate.threshold)),
+            "min_distance": float(d.min()),
+        }
+    return out
 
 
 def _gallery(
@@ -71,6 +98,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--config", default="configs/default.yaml")
     ap.add_argument("--method", choices=["knn_patch", "autoencoder"], default=None)
+    ap.add_argument(
+        "--ood-categories",
+        default="",
+        help="comma-separated other MVTec categories (already downloaded) used only to report "
+        "how often the scope gate rejects images of other objects",
+    )
     args = ap.parse_args(argv)
 
     cfg = load_config(args.config)
@@ -108,8 +141,39 @@ def main(argv: list[str] | None = None) -> int:
     test_scores, test_maps = model.predict(x_test)
     per_image_ms = (time.perf_counter() - t0) * 1000 / len(x_test)
 
+    gate: ScopeGate | None = None
+    in_scope = [True] * len(x_test)
+    scope_metrics: dict = {"enabled": False}
+    if cfg.scope.enabled:
+        gate = ScopeGate(scope_extractor(cfg, model)).fit(
+            x_train,
+            x_val,
+            cfg.scope.quantile,
+            cfg.scope.margin,
+            cfg.scope.synthetic_defects_per_image,
+            cfg.project.seed,
+        )
+        test_scope = gate.assess(x_test)
+        in_scope = [r.in_scope for r in test_scope]
+        d_test = np.array([r.distance for r in test_scope])
+        ood = [c.strip() for c in args.ood_categories.split(",") if c.strip()]
+        scope_metrics = {
+            "enabled": True,
+            "threshold": gate.threshold,
+            "calibration": gate.calibration,
+            "test_normals_in_scope": f"{int(np.sum(d_test[y_test == 0] <= gate.threshold))}"
+            f" of {int(np.sum(y_test == 0))}",
+            "test_anomalies_in_scope": f"{int(np.sum(d_test[y_test == 1] <= gate.threshold))}"
+            f" of {int(np.sum(y_test == 1))}",
+            "max_test_distance": float(d_test.max()),
+            "other_categories": ood_rejection(gate, Path(cfg.data.root), ood, size),
+        }
+
     quality = [assess_quality(img, cfg.quality) for img in x_test]
-    decisions = [decide(float(s), q.passed, thr) for s, q in zip(test_scores, quality, strict=True)]
+    decisions = [
+        decide(float(s), q.passed, thr, ins)
+        for s, q, ins in zip(test_scores, quality, in_scope, strict=True)
+    ]
     anomalous_masks_missing = int(sum(1 for s in s_test if s.label == 1 and s.mask_path is None))
 
     metrics = {
@@ -123,6 +187,7 @@ def main(argv: list[str] | None = None) -> int:
             y_test, test_scores, thr.likely_anomaly_threshold
         ),
         "decisions": decision_metrics(y_test, decisions),
+        "scope_gate": scope_metrics,
         "timing": {
             "fit_seconds": fit_s,
             "batch_predict_ms_per_image": per_image_ms,
@@ -156,6 +221,8 @@ def main(argv: list[str] | None = None) -> int:
         artefact_uri=art_dir.as_posix(),
     )
     model.save(art_dir)
+    if gate is not None:
+        gate.save(art_dir)
     (art_dir / "model_version.json").write_text(
         json.dumps(
             {

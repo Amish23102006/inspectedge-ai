@@ -20,11 +20,15 @@ from pathlib import Path
 REPO_ID = "Voxel51/mvtec-ad"
 
 
-def _jobs(samples: list[dict], category: str, cat_dir: Path) -> list[tuple[str, Path]]:
+def _jobs(
+    samples: list[dict], category: str, cat_dir: Path, splits: tuple[str, ...] | None = None
+) -> list[tuple[str, Path]]:
     """Map mirror samples of ``category`` to (remote path, local destination) pairs."""
     jobs: list[tuple[str, Path]] = []
     for s in samples:
         if s.get("category", {}).get("label") != category:
+            continue
+        if splits is not None and s["split"] not in splits:
             continue
         split = s["split"]
         defect = s["defect"]["label"]
@@ -36,16 +40,26 @@ def _jobs(samples: list[dict], category: str, cat_dir: Path) -> list[tuple[str, 
     return jobs
 
 
-def fetch_category(category: str, root: str | Path, workers: int = 16) -> Path:
-    """Download ``category`` into ``root`` (no-op if it is already there). Returns its folder."""
+def fetch_category(
+    category: str,
+    root: str | Path,
+    workers: int = 16,
+    splits: tuple[str, ...] | None = None,
+) -> Path:
+    """Download ``category`` into ``root`` (no-op if already there). Returns its folder.
+
+    ``splits=("test",)`` fetches only the test images (used for out-of-scope checks).
+    """
     from huggingface_hub import hf_hub_download
 
     cat_dir = Path(root) / category
-    if any((cat_dir / "train" / "good").glob("*.png")):
+    probe = cat_dir / ("train/good" if splits is None or "train" in splits else "test")
+    if any(probe.rglob("*.png")):
         return cat_dir
 
     meta = Path(hf_hub_download(REPO_ID, "samples.json", repo_type="dataset"))
-    jobs = _jobs(json.loads(meta.read_text(encoding="utf-8"))["samples"], category, cat_dir)
+    samples = json.loads(meta.read_text(encoding="utf-8"))["samples"]
+    jobs = _jobs(samples, category, cat_dir, splits)
     if not jobs:
         raise ValueError(f"category {category!r} not found in {REPO_ID}")
 

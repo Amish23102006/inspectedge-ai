@@ -81,6 +81,19 @@ class QualityConfig(_Strict):
     min_contrast: float = 8.0
 
 
+class ScopeConfig(_Strict):
+    """Out-of-scope gate: refuse to score images unlike the training setup.
+
+    threshold = margin * quantile(distances of held-out normals + synthetic defects made from
+    them); test data is never used.
+    """
+
+    enabled: bool = True
+    quantile: float = Field(1.0, gt=0, le=1)
+    margin: float = Field(1.5, ge=1.0)
+    synthetic_defects_per_image: int = Field(4, ge=0, le=50)
+
+
 class UploadConfig(_Strict):
     max_bytes: int = Field(10 * 1024 * 1024, gt=0)
     max_pixels: int = Field(40_000_000, gt=0)
@@ -99,6 +112,7 @@ class AppConfig(_Strict):
     model: ModelConfig = Field(default_factory=ModelConfig)
     policy: PolicyConfig = Field(default_factory=PolicyConfig)
     quality: QualityConfig = Field(default_factory=QualityConfig)
+    scope: ScopeConfig = Field(default_factory=ScopeConfig)
     upload: UploadConfig = Field(default_factory=UploadConfig)
     paths: PathsConfig = Field(default_factory=PathsConfig)
 

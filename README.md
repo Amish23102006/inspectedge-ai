@@ -19,10 +19,13 @@ Factories have many images of normal parts but few, unrepresentative defect exam
 ```
 upload → validation (type, magic bytes, size, pixel limit)
        → quality gate (blur / brightness / contrast) ──fail──► RECAPTURE (model not called)
+       → scope gate (does it look like this product's setup?) ──no──► OUT_OF_SCOPE (not scored)
        → anomaly model → score + heatmap
        → calibrated thresholds → PASS | MANUAL_REVIEW | LIKELY_ANOMALY
        → human disposition + reason code → SQLite audit trail
 ```
+
+**Why a scope gate?** A model trained only on normal bottles can answer "how different is this from the bottles I know?" but not "is this a bottle at all?", so without the gate any unrelated photo comes back as LIKELY_ANOMALY. The gate compares the image's global embedding with the training images and refuses to score anything outside the calibrated range. Its threshold comes from held-out normal images plus synthetic defects made from them (cut-paste patches, brightness changes, scratches), never from the test set.
 
 The score is the maximum of the smoothed heatmap, so the score and the highlighted region always agree. Heatmap colours use a fixed scale (0 → likely-anomaly threshold), not per-image normalisation, so normal images do not look "hot".
 
@@ -104,9 +107,19 @@ Every number below comes from a recorded run with its dataset, split, seed, conf
 
 | Category | Method | Image AUROC (95% CI) | Image AUPR | Pixel AUROC | False alarms / 100 @ pass thr. | Missed anomalies routed to PASS | Report |
 |---|---|---|---|---|---|---|---|
-| bottle | Baseline A: kNN patch features (ResNet-18 layer2+3) | 1.000 (1.000–1.000) | 1.000 | 0.983 | 6.0 | 0 of 63 | [report](reports/evaluations/knn_patch-bottle-6016e191570e.json) · [run](https://github.com/Amish23102006/inspectedge-ai/actions/runs/42523327695) |
+| bottle | Baseline A: kNN patch features (ResNet-18 layer2+3) | 1.000 (1.000–1.000) | 1.000 | 0.983 | 6.0 | 0 of 63 | [report](reports/evaluations/knn_patch-bottle-1239f723b8d1.json) · [run](https://github.com/Amish23102006/inspectedge-ai/actions/runs/42527445412) |
 
-**Reading these numbers honestly:** the test set is small (83 images: 20 normal, 63 defective) and *bottle* is one of the easier MVTec AD categories, so image AUROC saturates at 1.0 and the CI is degenerate. The operationally useful figures are the threshold ones: at the pass threshold no defective bottle is passed, while 5 of 20 normal bottles are not auto-passed (3 sent to manual review, 2 flagged as likely anomalies; 6.0 false alarms per 100 images). Thresholds were calibrated only on 42 held-out normal images; the test set was never used to choose them. Results on one category say nothing about other categories or real factory images.
+**Scope gate** (same run; threshold 0.031 cosine distance):
+
+| Images | Accepted for inspection | Rejected as OUT_OF_SCOPE |
+|---|---|---|
+| bottle test, normal (20) | 20 (100%) | 0 |
+| bottle test, defective (63) | 63 (100%) | 0 |
+| Other MVTec AD objects, test split (694: cable, screw, hazelnut, metal nut, toothbrush, carpet) | 0 | 694 (100%); closest at 0.066, about 2× the threshold |
+
+How this was reached, for transparency: the first version calibrated the gate on normal bottles alone. Normal bottles are nearly identical, so that threshold (0.0017) also turned away 54 of the 63 defective test bottles ([run](https://github.com/Amish23102006/inspectedge-ai/actions/runs/42526900884)). Calibration was then changed to normals + synthetic defects; the threshold itself still never sees test data, but the design change was prompted by that test result. "Other objects" are other MVTec categories photographed in a similar studio setup; everyday photos are usually much further away.
+
+**Reading these numbers honestly:** the test set is small (83 images: 20 normal, 63 defective) and *bottle* is one of the easier MVTec AD categories, so image AUROC saturates at 1.0 and the CI is degenerate. The operationally useful figures are the threshold ones: at the pass threshold no defective bottle is passed, while 5 of 20 normal bottles are not auto-passed (3 sent to manual review, 2 flagged as likely anomalies; 6.0 false alarms per 100 images). Decision thresholds were calibrated only on 42 held-out normal images; the test set was never used to choose them. Results on one category say nothing about other categories or real factory images.
 
 ## Project status
 

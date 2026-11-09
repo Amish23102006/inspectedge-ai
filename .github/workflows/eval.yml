@@ -23,11 +23,20 @@ jobs:
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchvision==0.22.1
           pip install -e . huggingface_hub
       - name: Fetch data
-        run: python -c "from inspectedge.data.hf_mirror import fetch_category as f; f('bottle', 'data/raw/mvtec_ad')"
+        run: |
+          python - <<'PY'
+          from inspectedge.data.hf_mirror import fetch_category as f
+          f("bottle", "data/raw/mvtec_ad")
+          # Other objects, test split only: used solely to measure the out-of-scope gate.
+          for c in ("cable", "screw", "hazelnut", "metal_nut", "toothbrush", "carpet"):
+              f(c, "data/raw/mvtec_ad", splits=("test",))
+          PY
       - name: Prepare (integrity + leakage checks)
         run: python -m inspectedge.data.prepare
       - name: Train + evaluate
-        run: python -m inspectedge.evaluation.run_eval --method ${{ inputs.method }}
+        run: >-
+          python -m inspectedge.evaluation.run_eval --method ${{ inputs.method }}
+          --ood-categories cable,screw,hazelnut,metal_nut,toothbrush,carpet
       - name: Publish report to the run summary
         run: |
           echo '## Evaluation report' >> "$GITHUB_STEP_SUMMARY"

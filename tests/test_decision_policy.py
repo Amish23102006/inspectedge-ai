@@ -23,6 +23,12 @@ def test_three_way_decision(score, expected, thresholds):
 def test_quality_failure_overrides_any_score(thresholds):
     assert decide(9.0, False, thresholds) is Decision.RECAPTURE
     assert decide(None, False, thresholds) is Decision.RECAPTURE
+    assert decide(None, False, thresholds, in_scope=False) is Decision.RECAPTURE
+
+
+def test_out_of_scope_is_not_scored(thresholds):
+    assert decide(None, True, thresholds, in_scope=False) is Decision.OUT_OF_SCOPE
+    assert decide(0.1, True, thresholds, in_scope=False) is Decision.OUT_OF_SCOPE
 
 
 @pytest.mark.parametrize("bad", [None, math.nan, math.inf])

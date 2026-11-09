@@ -14,6 +14,12 @@ DECISION_STYLE = {
     "MANUAL_REVIEW": ("🟡", "warning"),
     "LIKELY_ANOMALY": ("🔴", "error"),
     "RECAPTURE": ("📷", "info"),
+    "OUT_OF_SCOPE": ("🚫", "warning"),
+}
+DECISION_NOTE = {
+    "RECAPTURE": "image quality too poor to assess; retake the photo",
+    "OUT_OF_SCOPE": "not assessed: this image does not look like the inspection setup the model "
+    "was trained on",
 }
 
 st.set_page_config(page_title="InspectEdge AI", page_icon="🔍", layout="wide")
@@ -53,7 +59,8 @@ if source and st.button("Inspect", type="primary", disabled=not health["model_lo
 res = st.session_state.get("result")
 if res:
     icon, kind = DECISION_STYLE[res["decision"]]
-    getattr(st, kind)(f"{icon} **{res['decision']}** — human review required for final disposition")
+    note = DECISION_NOTE.get(res["decision"], "human review required for final disposition")
+    getattr(st, kind)(f"{icon} **{res['decision']}** — {note}")
 
     c1, c2, c3 = st.columns([1, 1, 1])
     c1.image(st.session_state["image"], caption="Original", width="stretch")
@@ -63,14 +70,25 @@ if res:
             caption="Anomaly heatmap (fixed scale)",
             width="stretch",
         )
+    elif res["decision"] == "OUT_OF_SCOPE":
+        c2.info(
+            f"No heatmap: the model only knows top-down photos of `{res['category']}` parts "
+            "from its training setup, so it does not score other images."
+        )
     else:
         c2.info("No heatmap: input failed the quality gate.")
     t = res["thresholds"]
     score = res["anomaly_score"]
-    c3.metric("Anomaly score", "NOT AVAILABLE" if score is None else f"{score:.4f}")
+    c3.metric("Anomaly score", "NOT ASSESSED" if score is None else f"{score:.4f}")
     c3.write(f"Pass < `{t['pass_threshold']:.4f}` ≤ review < `{t['likely_anomaly_threshold']:.4f}`")
     q = res["quality"]
     c3.write(f"Quality: {'passed' if q['passed'] else 'FAILED'}")
+    if res.get("scope"):
+        sc = res["scope"]
+        c3.write(
+            f"Scope: {'in scope' if sc['in_scope'] else 'OUT OF SCOPE'} "
+            f"(distance `{sc['distance']:.4f}` vs limit `{sc['threshold']:.4f}`)"
+        )
     for w in q["warnings"]:
         c3.write(f"- {w}")
     c3.caption(f"Latency {res['latency_ms']:.0f} ms · id `{res['inspection_id']}`")
